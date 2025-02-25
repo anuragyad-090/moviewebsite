@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieStream - Your Ultimate Streaming Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">MovieStream</div>
+            <div class="nav-links">
+                <a href="#" class="active" id="homeLink">Home</a>
+                <a href="#" id="moviesLink">Movies</a>
+                <a href="#" id="tvShowsLink">TV Shows</a>
+            </div>
+            <div class="search-auth">
+                <input type="text" placeholder="Search movies..." id="searchInput">
+                <i class="fas fa-search"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Unlimited Entertainment</h1>
+                <p>Discover and stream thousands of movies and TV shows. Start your journey today.</p>
+            </div>
+        </section>
+
+        <section class="featured-content">
+            <h2 id="contentTitle">Featured Movies</h2>
+            <div class="movie-grid" id="movieGrid">
+                <!-- Movies will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- Video Player Modal -->
+        <div id="videoModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="video-container">
+                    <iframe id="videoPlayer" frameborder="0" allowfullscreen></iframe>
+                    <div class="source-selector-container">
+                        <select id="sourceSelector" class="source-selector">
+                            <!-- Video sources will be dynamically loaded here -->
+                        </select>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <h2 id="modalMovieTitle"></h2>
+                    <p id="modalMovieDetails"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 MovieStream. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        document.getElementById('moviesLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById('contentTitle').textContent = 'Featured Movies';
+            window.fetchMovies();
+        });
+
+        document.getElementById('tvShowsLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById('contentTitle').textContent = 'Featured TV Shows';
+            window.fetchTVShows();
+        });
+
+        document.getElementById('homeLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById('contentTitle').textContent = 'Featured Movies';
+            window.fetchMovies();
+        });
+    </script>
+</body>
+</html>
