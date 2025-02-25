@@ -129,7 +129,13 @@ function loadContent(items, type) {
                 <h3>${item.title}</h3>
                 <p>Rating: ${item.rating} ⭐</p>
                 <p>Year: ${item.year}</p>
-                ${type === 'tv' && item.seasons ? `<p>Seasons: ${item.seasons}</p>` : ''}
+                ${type === 'tv' ? `
+                    <p>Seasons: ${item.seasons || 'N/A'}</p>
+                    ${item.network ? `<p>Network: ${item.network}</p>` : ''}
+                    ${item.genre && item.genre.length ? `<p class="genres">${item.genre.slice(0, 2).join(' • ')}</p>` : ''}
+                    ${item.status ? `<p class="status">${item.status}</p>` : ''}
+                    ${item.overview ? `<p class="overview">${item.overview.substring(0, 100)}${item.overview.length > 100 ? '...' : ''}</p>` : ''}
+                ` : ''}
             </div>
         `;
         movieGrid.appendChild(card);
@@ -151,6 +157,7 @@ function showMovieDetails(movie) {
     const modal = document.getElementById('videoModal');
     const modalTitle = document.getElementById('modalMovieTitle');
     const modalDetails = document.getElementById('modalMovieDetails');
+    const closeBtn = document.querySelector('.close-modal');
 
     modalTitle.textContent = movie.title;
     modalDetails.textContent = `Rating: ${movie.rating} ⭐ | Year: ${movie.year}`;
@@ -159,6 +166,24 @@ function showMovieDetails(movie) {
     loadVideo(movie.id, 'movie');
 
     modal.style.display = 'block';
+
+    // Close modal when clicking the close button
+    const closeModal = () => {
+        modal.style.display = 'none';
+        videoPlayer.src = '';
+        closeBtn.removeEventListener('click', closeModal);
+        window.removeEventListener('click', windowClick);
+    };
+
+    // Close modal when clicking outside
+    const windowClick = (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', windowClick);
 }
 
 // Show TV show details with season/episode selection
@@ -209,18 +234,22 @@ function showTVDetails(show, seasons) {
 
     // Close modal when clicking the close button
     const closeBtn = document.querySelector('.close-modal');
-    closeBtn.onclick = function() {
+    const closeModal = () => {
         modal.style.display = 'none';
         videoPlayer.src = '';
+        closeBtn.removeEventListener('click', closeModal);
+        window.removeEventListener('click', windowClick);
     };
 
     // Close modal when clicking outside
-    window.onclick = function(event) {
+    const windowClick = (event) => {
         if (event.target === modal) {
-            modal.style.display = 'none';
-            videoPlayer.src = '';
+            closeModal();
         }
     };
+
+    closeBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', windowClick);
 }
 
 // Search functionality
@@ -232,7 +261,7 @@ searchInput.addEventListener('input', (e) => {
     if (searchTerm) {
         searchTimeout = setTimeout(async () => {
             try {
-                const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(searchTerm)}`);
+                const response = await fetch(`${API_URL}/search?q=${encodeURIComponent(searchTerm)}&type=${currentContentType}`);
                 const data = await response.json();
                 if (response.ok) {
                     loadContent(data, currentContentType);
@@ -253,8 +282,15 @@ searchInput.addEventListener('input', (e) => {
 });
 
 // Expose fetch functions to window object for navigation
-window.fetchMovies = fetchMovies;
-window.fetchTVShows = fetchTVShows;
+window.fetchMovies = () => {
+    currentContentType = 'movie';
+    fetchMovies();
+};
+
+window.fetchTVShows = () => {
+    currentContentType = 'tv';
+    fetchTVShows();
+};
 
 // Handle video player errors
 videoPlayer.addEventListener('error', () => {

@@ -133,7 +133,11 @@ def get_tv_shows():
                 'poster': f'https://image.tmdb.org/t/p/w500{show.poster_path}',
                 'rating': round(show.vote_average, 1),
                 'year': show.first_air_date[:4] if show.first_air_date else 'N/A',
-                'seasons': show.number_of_seasons if hasattr(show, 'number_of_seasons') else None
+                'seasons': show.number_of_seasons if hasattr(show, 'number_of_seasons') else None,
+                'overview': show.overview if hasattr(show, 'overview') else None,
+                'genre': [genre.name for genre in show.genres] if hasattr(show, 'genres') else [],
+                'network': show.networks[0].name if hasattr(show, 'networks') and show.networks else None,
+                'status': show.status if hasattr(show, 'status') else None
             } for show in popular_shows]
             return jsonify(shows)
         except Exception as e:
@@ -216,42 +220,43 @@ def search_content():
     for attempt in range(max_retries):
         try:
             query = request.args.get('q', '')
+            content_type = request.args.get('type', 'all')
             if not query:
                 return jsonify([])
             
-            # Search both movies and TV shows
-            movie_results = movie_obj.search(query)
-            tv_results = tv_obj.search(query)
-            
             combined_results = []
             
-            # Process movie results
-            for movie in movie_results[:6]:  # Limit to 6 movies
-                if not hasattr(movie, 'poster_path') or not movie.poster_path:
-                    continue
-                
-                combined_results.append({
-                    'id': movie.id,
-                    'title': movie.title,
-                    'poster': f'https://image.tmdb.org/t/p/w500{movie.poster_path}',
-                    'rating': round(float(movie.vote_average), 1) if hasattr(movie, 'vote_average') else 0.0,
-                    'year': movie.release_date[:4] if hasattr(movie, 'release_date') and movie.release_date else 'N/A',
-                    'type': 'movie'
-                })
+            # Search and process movies if content_type is 'all' or 'movie'
+            if content_type in ['all', 'movie']:
+                movie_results = movie_obj.search(query)
+                for movie in movie_results[:6]:  # Limit to 6 movies
+                    if not hasattr(movie, 'poster_path') or not movie.poster_path:
+                        continue
+                    
+                    combined_results.append({
+                        'id': movie.id,
+                        'title': movie.title,
+                        'poster': f'https://image.tmdb.org/t/p/w500{movie.poster_path}',
+                        'rating': round(float(movie.vote_average), 1) if hasattr(movie, 'vote_average') else 0.0,
+                        'year': movie.release_date[:4] if hasattr(movie, 'release_date') and movie.release_date else 'N/A',
+                        'type': 'movie'
+                    })
             
-            # Process TV show results
-            for show in tv_results[:6]:  # Limit to 6 TV shows
-                if not hasattr(show, 'poster_path') or not show.poster_path:
-                    continue
-                
-                combined_results.append({
-                    'id': show.id,
-                    'title': show.name,
-                    'poster': f'https://image.tmdb.org/t/p/w500{show.poster_path}',
-                    'rating': round(float(show.vote_average), 1) if hasattr(show, 'vote_average') else 0.0,
-                    'year': show.first_air_date[:4] if hasattr(show, 'first_air_date') and show.first_air_date else 'N/A',
-                    'type': 'tv'
-                })
+            # Search and process TV shows if content_type is 'all' or 'tv'
+            if content_type in ['all', 'tv']:
+                tv_results = tv_obj.search(query)
+                for show in tv_results[:6]:  # Limit to 6 TV shows
+                    if not hasattr(show, 'poster_path') or not show.poster_path:
+                        continue
+                    
+                    combined_results.append({
+                        'id': show.id,
+                        'title': show.name,
+                        'poster': f'https://image.tmdb.org/t/p/w500{show.poster_path}',
+                        'rating': round(float(show.vote_average), 1) if hasattr(show, 'vote_average') else 0.0,
+                        'year': show.first_air_date[:4] if hasattr(show, 'first_air_date') and show.first_air_date else 'N/A',
+                        'type': 'tv'
+                    })
             
             return jsonify(combined_results)
         except Exception as e:
@@ -267,4 +272,4 @@ def search_content():
             }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000)
