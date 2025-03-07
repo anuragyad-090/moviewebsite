@@ -9,8 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 </head>
 <body>
+    <div id="particles-js"></div>
     <header>
         <nav class="navbar">
             <div class="logo">MovieStream</div>
@@ -66,6 +68,10 @@
     </footer>
 
     <script type="module" src="app.js"></script>
+    <script type="module">
+        import particlesConfig from './particles.js';
+        window.particlesJS('particles-js', particlesConfig);
+    </script>
     <script>
         document.getElementById('moviesLink').addEventListener('click', (e) => {
             e.preventDefault();
